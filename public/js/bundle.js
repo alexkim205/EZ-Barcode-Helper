@@ -28718,61 +28718,169 @@ return jQuery;
 } );
 
 },{}],34:[function(require,module,exports){
-var $ = require("jquery")
-var d3 = require("d3");
+
+var rev, fwd
+
+fwd = rev = [
+    "AGTCAA", "AGTTCC", "ATGTCA", "CCGTCC", "GTAGAG", "GTCCGC", 
+    "GTGAAA", "GTGGCC", "GTTTCG", "CGTACG", "GAGTGG", "GGTAGC", 
+    
+    "ACTGAT", "ATGAGC", "ATTCCT", "CAAAAG", "CAACTA", "CACCGG", 
+    "CACGAT", "CACTCA", "CAGGCG", "CATGGC", "CATTTT", "CCAACA", 
+    
+    "CGGAAT", "CTAGCT", "CTATAC", "CTCAGA", "GACGAC", "TAATCG", 
+    "TACAGC", "TATAAT", "TCATTC", "TCCCGA", "TCGAAG", "TCGGCA"
+]
+
+
+},{}],35:[function(require,module,exports){
+var d3 = require("d3")
+
+var plateData = function (num_rows = 8, num_cols = 12) {
+
+  // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
+  function numRange(size, startAt = 0) {
+    return [...Array(size).keys()].map(i => i + startAt);
+  }
+  // https://stackoverflow.com/questions/24597634/how-to-generate-an-array-of-alphabet-in-jquery
+  function charRange(c1 = 0, c2 = 25) {
+    let a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    return (a.slice(c1, c2));
+  }
+
+  var row_labels = charRange(0, num_rows),
+    col_labels = numRange(num_cols, 1)
+
+  var data = new Array(),
+    xpos = 1,
+    ypos = 1,
+    p_width = 50,
+    p_height = 50
+
+  for (let row = 0; row < num_rows; row++) {
+    data.push(new Array())
+
+    for (let col = 0; col < num_cols; col++) {
+      data[row].push({
+        x: xpos,
+        y: ypos,
+        width: p_width,
+        height: p_height,
+        col_i: col_labels[col],
+        row_i: row_labels[row]
+      })
+      xpos += p_width
+    }
+    xpos = 1
+    ypos += p_height
+  }
+
+  return data
+}
+
+var chooseFile = function () {
+
+  d3.select("body")
+    .append("input")
+    .attr("type", "file")
+    .attr("accept", ".tsv")
+    .style("margin", "5px")
+    .on("change", function () {
+      var file = d3.event.target.files[0]
+      if (file) {
+        var reader = new FileReader()
+        reader.onloadend = function (evt) {
+          var dataUrl = evt.target.result
+          // The following call results in an "Access denied" error in IE.
+          d3.tsv(dataUrl, function (error, data) {
+            if (error) throw error
+            return data
+          })
+        }
+        reader.readAsDataURL(file)
+      }
+    })
+
+}
+
+module.exports = {
+  plateData: plateData,
+  chooseFile: chooseFile
+}
+},{"d3":32}],36:[function(require,module,exports){
+// dependencies
+const $ = require("jquery")
+const d3 = require("d3")
+require("d3-scale-chromatic")
+
+// require functions
+var {
+  plateData,
+  chooseFile
+} = require("./functions")
+// require data
+var {
+  fwd,
+  rev
+} = require("./data")
 
 $(document).ready(function () {
-    console.log("ready")
 
-    var margin = {
-            top: 100,
-            right: 100,
-            bottom: 100,
-            left: 100
-        },
-        width = 500,
-        height = 500
+  console.log("ready")
 
-    var svg = d3.select("body")
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+  var file_data = chooseFile()
+  var plate_data = plateData(8, 12)
 
-    svg.append("rect")
-        .attr("class", "background")
-        .attr("width", width)
-        .attr("height", height)
+  var width = 800,
+    height = 500
 
-    var num_rows = 12,
-        num_cols = 8,
-        row_labels = ["A", "B", "C", "D", "E", "F", "G", "H"],
-        col_labels = [0, num_rows]
+  /* 
+   * Barcode Plate
+   */
 
-    var colScale = d3.scaleBand()
-        .domain(col_labels)
-        .rangeRound([0, width])
+  var svg_bc = d3.select("#svg_bc")
+    .attr("width", width)
+    .attr("height", height)
 
-    var rowScale = d3.scaleBand()
-        .domain(row_labels)
-        .rangeRound([0, height])
-    
-    var colors = d3.schemeSet3()
+  /* 
+   * Plate
+   */
 
-    var cell = svg.selectAll("rect.cell")
-        .data(col_labels)
-        .enter()
-        .append("rect")
-            .attr("class", "cell")
-            .style("fill", colors)
-            .attr("x", function(d) {return colScale(d)})
-            .attr("y", 50)
-            .attr("width", colScale.rangeBand())
-            .attr("height", 50)
-            
+  var svg_plate = d3.select("#svg_plate")
+    .attr("width", width)
+    .attr("height", height)
 
-    console.log()
+  var colors = d3.scaleOrdinal(d3.schemeSet3)
+
+  // construct rows
+  var row = svg_plate.selectAll("g.row")
+    .data(plate_data)
+    .enter()
+    .append("g")
+    .attr("class", "row")
+
+  // construct columns
+  row.selectAll("rect.cell")
+    .data(function (d) {
+      return d
+    })
+    .enter()
+    .append("rect")
+    .attr("class", "cell")
+    .attr("width", function (d) {
+      return d.width
+    })
+    .attr("height", function (d) {
+      return d.height
+    })
+    .attr("x", function (d) {
+      return d.x
+    })
+    .attr("y", function (d) {
+      return d.y
+    })
+    .style("fill", "#fff")
+    .style("stroke", "rgba(0,0,0,0.6)")
 
 })
-},{"d3":32,"jquery":33}]},{},[34]);
+},{"./data":34,"./functions":35,"d3":32,"d3-scale-chromatic":22,"jquery":33}]},{},[36]);
