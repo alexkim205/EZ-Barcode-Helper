@@ -1,6 +1,10 @@
 var d3 = require("d3")
 
-var plateData = function (num_rows = 8, num_cols = 12) {
+var makePlate = function (svg_id, num_rows = 8, num_cols = 12, width = 600, height = 500) {
+  
+}
+
+var plateData = function (num_rows = 8, num_cols = 12, width = 600, height = 500) {
 
   // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
   function numRange(size, startAt = 0) {
@@ -18,9 +22,10 @@ var plateData = function (num_rows = 8, num_cols = 12) {
   var data = new Array(),
     xpos = 1,
     ypos = 1,
-    p_width = 50,
-    p_height = 50
+    p_width = Math.round(width/num_cols),
+    p_height = p_width
 
+  // populate cell data
   for (let row = 0; row < num_rows; row++) {
     data.push(new Array())
 
@@ -39,7 +44,7 @@ var plateData = function (num_rows = 8, num_cols = 12) {
     ypos += p_height
   }
 
-  return data
+  return [col_labels, row_labels, data, Math.round(p_width/2)]
 }
 
 var chooseFile = function () {

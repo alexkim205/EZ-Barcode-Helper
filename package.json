@@ -6,7 +6,7 @@
   "scripts": {
     "server": "http-server",
     "build-css": "echo 'No CSS to build yet'",
-    "build-js": "watchify public/js/main.js -o public/js/bundle.js"
+    "build-js": "watchify --debug public/js/main.js -o public/js/bundle.js"
   },
   "author": "",
   "license": "ISC",
