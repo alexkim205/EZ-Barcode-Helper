@@ -18,16 +18,17 @@ $(document).ready(function () {
 
   console.log("ready")
 
+  // var file_data = chooseFile()
+  // console.log(file_data)
+
   var width = 500,
     height = 300,
     padding = {
       top: 50,
-      right: 50,
+      right: 30,
       bottom: 50,
-      left: 50
+      left: 30
     }
-
-  var file_data = chooseFile()
 
   /* Barcode Plate */
 
@@ -35,7 +36,7 @@ $(document).ready(function () {
     bc_num_cols = 12
 
   var bc_svg = makePlate("svg_bc", bc_num_rows, bc_num_cols,
-    width, height, padding)
+    width, padding)
 
   /* Prep Plate */
 
@@ -43,7 +44,10 @@ $(document).ready(function () {
     plate_num_cols = 12
 
   var plate_svg = makePlate("svg_plate", plate_num_rows, plate_num_cols,
-    width, height, padding)
+    width, padding)
+
+  // connecting logic
+
 
 
 })

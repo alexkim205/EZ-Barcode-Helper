@@ -2,7 +2,7 @@ const $ = require("jquery")
 var d3 = require("d3")
 
 var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
-  width = 600, height = 500, padding = {
+  width = 600, padding = {
     top: 100,
     right: 100,
     bottom: 100,
@@ -27,7 +27,8 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
     xpos = 1,
     ypos = 1,
     p_width = Math.round(width / num_cols),
-    p_height = p_width
+    p_height = p_width,
+    height = p_width * num_rows
 
   // populate cell data
   for (let row = 0; row < num_rows; row++) {
@@ -84,10 +85,11 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
     .style("stroke", "rgba(0,0,0,0.6)")
     .on("mouseover", function (d) {
       $(rows).find("rect.cell").attr("fill", "#fff")
-      $(this).css("fill", "#000")
+      $(this).siblings().css("fill", "#000")
+
     })
     .on("mouseout", function (d) {
-      $(this).css("fill", "#fff")
+      $(this).siblings().css("fill", "#fff")
     })
 
   // draw labels
@@ -120,9 +122,7 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
 
 var chooseFile = function () {
 
-  d3.select("body")
-    .append("input")
-    .attr("type", "file")
+  d3.select("input#barcode_f")
     .attr("accept", ".tsv")
     .style("margin", "5px")
     .on("change", function () {
@@ -134,7 +134,9 @@ var chooseFile = function () {
           // The following call results in an "Access denied" error in IE.
           d3.tsv(dataUrl, function (error, data) {
             if (error) throw error
-            return data
+            data.forEach(function (d) {
+              console.log(d)
+            })
           })
         }
         reader.readAsDataURL(file)
