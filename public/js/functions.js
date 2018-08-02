@@ -159,8 +159,7 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
 
   let populatePlateData = function (_plate_num_rows, _plate_num_cols) {
 
-    var _plate_data = new Array(),
-      row_labels = charRange(0, _plate_num_rows),
+    var row_labels = charRange(0, _plate_num_rows),
       col_labels = numRange(_plate_num_cols, 1)
 
     Array.prototype.getIndexByRow = function (bcToMatch) {
@@ -173,6 +172,8 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
       }
       return [-1, -1]
     }
+
+    var _plate_data = new Array()
 
     // populate cell data
     for (let row = 0; row < _plate_num_rows; row++) {
@@ -222,27 +223,53 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
 
   var plate_data = populatePlateData(plate_num_rows, plate_num_cols)
 
-  $.each(plate_data, function(i, v) {
-    let bcrow1 = bc_rows.eq(v[0].bc_row1),
-      bcrow2 = bc_rows.eq(v[0].bc_row2),
-      prow = plate_rows.eq(v[0].row_here)
-    
-    prow.on("mouseover", function(d) {
-      // highlight plate row
-      $(this).children().css("fill","#000")
-      // highlight two barcode rows
-      $(bcrow1).children().css("fill", "#add")
-      $(bcrow2).children().css("fill", "#daa")
+  // render row highlights
+  $.each(plate_data, function (i, row) {
+    let bcrow1 = bc_rows.eq(row[0].bc_row1),
+      bcrow2 = bc_rows.eq(row[0].bc_row2),
+      prow = plate_rows.eq(row[0].row_here)
+
+    prow.on("mouseover", function (d) {
+        // highlight plate row
+        $(this).children().css("fill", "#9b59b6")
+        // highlight two barcode rows
+        $(bcrow1).children().css("fill", "#3498db")
+        $(bcrow2).children().css("fill", "#e74c3c")
+      })
+      .on("mouseout", function (d) {
+        // clear on mouseout
+        $(this).children().css("fill", "#fff")
+        $(bcrow1).children().css("fill", "#fff")
+        $(bcrow2).children().css("fill", "#fff")
+      })
+
+    // render per cell
+    var row_labels = charRange(0, plate_num_rows),
+      col_labels = numRange(plate_num_cols, 1)
+
+    $.each(row, function (i, cell) {
+
+      let cellToHover = prow.children().eq(cell.col_here)
+      let $info = $("#well_id")
+
+      cellToHover.on("mouseover", function (d) {
+          // append appropriate info
+          $info.append("<p>Row: " + row_labels[cell.row_here] + "</p>")
+            .append("<p>Column: " + col_labels[cell.col_here] + "</p>")
+            .append("<p>Forward Barcode: " + cell.bc1 + "</p>")
+            .append("<p>Reverse Barcode: " + cell.bc2 + "</p>")
+        })
+        .on("mouseout", function (d) {
+          // clear
+          $info.empty()
+          $info.append("<h3>Well Information</h3>")
+        })
     })
-    .on("mouseout", function(d) {
-      // clear on mouseout
-      $(this).children().css("fill","#fff")
-      $(bcrow1).children().css("fill", "#fff")
-      $(bcrow2).children().css("fill", "#fff")
-    })
+
   })
 
   console.log(plate_data)
+
 }
 
 module.exports = {
