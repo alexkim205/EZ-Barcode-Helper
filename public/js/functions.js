@@ -1,6 +1,34 @@
 const $ = require("jquery")
 var d3 = require("d3")
 
+// require data
+
+var fwd,
+  rev
+
+$.getJSON("../js/data.json", function (data) {
+    console.log("success");
+    fwd = rev = data
+    console.log(data)
+  })
+  .fail(function () {
+    console.log("error");
+  })
+  .always(function () {
+    console.log("complete");
+  })
+
+// Create row and col array formulas
+// https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
+var numRange = function (size, startAt = 0) {
+  return [...Array(size).keys()].map(i => i + startAt);
+}
+// https://stackoverflow.com/questions/24597634/how-to-generate-an-array-of-alphabet-in-jquery
+var charRange = function (c1 = 0, c2 = 25) {
+  let a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+  return (a.slice(c1, c2))
+}
+
 var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
   width = 600, padding = {
     top: 100,
@@ -8,17 +36,6 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
     bottom: 100,
     left: 100
   }) {
-
-  // Create row and col array formulas
-  // https://stackoverflow.com/questions/3895478/does-javascript-have-a-method-like-range-to-generate-a-range-within-the-supp
-  function numRange(size, startAt = 0) {
-    return [...Array(size).keys()].map(i => i + startAt);
-  }
-  // https://stackoverflow.com/questions/24597634/how-to-generate-an-array-of-alphabet-in-jquery
-  function charRange(c1 = 0, c2 = 25) {
-    let a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-    return (a.slice(c1, c2))
-  }
 
   var row_labels = charRange(0, num_rows),
     col_labels = numRange(num_cols, 1)
@@ -122,28 +139,97 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
 
 var chooseFile = function () {
 
-  // handle upload button
-  function upload_button(el) {
-    var uploader = document.getElementById(el);
-    var reader = new FileReader();
+  var reader = new FileReader();
 
-    reader.onload = function (e) {
-      var contents = e.target.result
-      var data = d3.csvParse(contents)
-      console.log(data)
-    };
-
-    uploader.addEventListener("change", handleFiles, false);
-
-    function handleFiles() {
-      // d3.select("#table").text("loading...");
-      var file = this.files[0];
-      reader.readAsText(file);
-    };
+  reader.onload = function (e) {
+    var contents = e.target.result
+    var data = d3.tsvParseRows(contents, function (d, i) {
+      return {
+        Row: d[0],
+        Column: +d[1],
+        Barcode: d[2],
+      }
+    })
+    data.shift() // remove columns
+    console.log(data)
+    renderBCPlate(data, "svg_bc", "svg_plate")
   }
 
-  upload_button("barcode_f")
+  $("input#barcode_f")
+    .on("change", function () {
+      var file = this.files[0];
+      reader.readAsText(file);
+    })
 
+}
+
+var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_plate") {
+
+  // fwd
+  // rev
+
+  // barcodes
+  // var barcodes = []
+  // data.map(d => {
+  //   const fwd_rev = d.Barcode
+  // })
+  // console.log(barcodes)
+
+  var bc_svg = $("#" + bc_svg_id),
+    plate_svg = $("#" + plate_svg_id)
+
+  var bc_rows = bc_svg.find("g.row"),
+    plate_rows = plate_svg.find("g.row")
+
+  var plate_cells = plate_rows.find("rect.cell"),
+    bc_cells = bc_rows.find("rect.cell")
+
+  var bc_num_rows = bc_rows.length,
+    bc_num_cols = bc_rows.first().children().length,
+    plate_num_rows = plate_rows.length,
+    plate_num_cols = plate_rows.first().children().length
+
+  var plate_data = new Array(),
+    row_labels = charRange(0, plate_num_rows),
+    col_labels = numRange(plate_num_cols, 1)
+
+  // populate cell data
+  Array.prototype.getIndexByRow = function (bcToMatch) {
+    for (let i = 0; i < this.length; i++) {
+      const bc_row = this[i].row,
+        index = $.inArray(bcToMatch, bc_row)
+      if (index != -1) {
+        return [i, index]
+      }
+    }
+    return [-1, -1]
+  }
+
+  for (let row = 0; row < plate_num_rows; row++) {
+    plate_data.push(new Array())
+
+    for (let col = 0; col < plate_num_cols; col++) {
+
+      let bc_row = row_labels[row]
+      let bc_col = col_labels[col]
+
+      let cell_bc = data.find(e => (e.Row == bc_row && e.Column == bc_col)).Barcode.split("_")
+      let bc1 = cell_bc[0]
+      let bc2 = cell_bc[1]
+
+      plate_data[row].push({
+        mouse_on: [col_labels[col], row_labels[row]],
+        bc1: bc1,
+        bc2: bc2,
+        bc_row1: fwd.getIndexByRow(bc1)[0],
+        bc_row2: rev.getIndexByRow(bc2)[0] + 3, // add 3 b/c rev bc's come after fwd bc's
+        bc_offset1: fwd.getIndexByRow(bc1)[1],
+        bc_offset2: rev.getIndexByRow(bc2)[1]
+      })
+    }
+  }
+
+  console.log(plate_data)
 }
 
 module.exports = {

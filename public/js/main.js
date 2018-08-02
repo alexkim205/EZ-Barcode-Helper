@@ -8,18 +8,12 @@ var {
   makePlate,
   chooseFile
 } = require("./functions")
-// require data
-var {
-  fwd,
-  rev
-} = require("./data")
 
 $(document).ready(function () {
 
   console.log("ready")
 
   chooseFile()
-  // console.log(file_data)
 
   var width = 500,
     height = 300,
