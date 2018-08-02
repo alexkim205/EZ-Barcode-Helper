@@ -100,14 +100,6 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
     })
     .style("fill", "#fff")
     .style("stroke", "rgba(0,0,0,0.6)")
-    .on("mouseover", function (d) {
-      $(rows).find("rect.cell").attr("fill", "#fff")
-      $(this).siblings().css("fill", "#000")
-
-    })
-    .on("mouseout", function (d) {
-      $(this).siblings().css("fill", "#fff")
-    })
 
   // draw labels
   var x = d3.scalePoint()
@@ -165,69 +157,90 @@ var chooseFile = function () {
 
 var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_plate") {
 
-  // fwd
-  // rev
+  let populatePlateData = function (_plate_num_rows, _plate_num_cols) {
 
-  // barcodes
-  // var barcodes = []
-  // data.map(d => {
-  //   const fwd_rev = d.Barcode
-  // })
-  // console.log(barcodes)
+    var _plate_data = new Array(),
+      row_labels = charRange(0, _plate_num_rows),
+      col_labels = numRange(_plate_num_cols, 1)
 
+    Array.prototype.getIndexByRow = function (bcToMatch) {
+      for (let i = 0; i < this.length; i++) {
+        const bc_row = this[i].row,
+          index = $.inArray(bcToMatch, bc_row)
+        if (index != -1) {
+          return [i, index]
+        }
+      }
+      return [-1, -1]
+    }
+
+    // populate cell data
+    for (let row = 0; row < _plate_num_rows; row++) {
+      _plate_data.push(new Array())
+
+      for (let col = 0; col < _plate_num_cols; col++) {
+
+        let bc_row = row_labels[row]
+        let bc_col = col_labels[col]
+
+        let cell_bc = data.find(e => (e.Row == bc_row && e.Column == bc_col)).Barcode.split("_")
+        let bc1 = cell_bc[0]
+        let bc2 = cell_bc[1]
+
+        _plate_data[row].push({
+          row_here: row,
+          col_here: col,
+          bc1: bc1,
+          bc2: bc2,
+          bc_row1: fwd.getIndexByRow(bc1)[0],
+          bc_row2: rev.getIndexByRow(bc2)[0] + 3, // add 3 b/c rev bc's come after fwd bc's
+          bc_offset1: fwd.getIndexByRow(bc1)[1],
+          bc_offset2: rev.getIndexByRow(bc2)[1]
+        })
+      }
+    }
+
+    return _plate_data
+
+  }
+
+  // DOMs
+  //// svgs
   var bc_svg = $("#" + bc_svg_id),
     plate_svg = $("#" + plate_svg_id)
-
+  //// rows
   var bc_rows = bc_svg.find("g.row"),
     plate_rows = plate_svg.find("g.row")
-
+  //// cells
   var plate_cells = plate_rows.find("rect.cell"),
     bc_cells = bc_rows.find("rect.cell")
-
+  //// counts
   var bc_num_rows = bc_rows.length,
     bc_num_cols = bc_rows.first().children().length,
     plate_num_rows = plate_rows.length,
     plate_num_cols = plate_rows.first().children().length
 
-  var plate_data = new Array(),
-    row_labels = charRange(0, plate_num_rows),
-    col_labels = numRange(plate_num_cols, 1)
+  var plate_data = populatePlateData(plate_num_rows, plate_num_cols)
 
-  // populate cell data
-  Array.prototype.getIndexByRow = function (bcToMatch) {
-    for (let i = 0; i < this.length; i++) {
-      const bc_row = this[i].row,
-        index = $.inArray(bcToMatch, bc_row)
-      if (index != -1) {
-        return [i, index]
-      }
-    }
-    return [-1, -1]
-  }
-
-  for (let row = 0; row < plate_num_rows; row++) {
-    plate_data.push(new Array())
-
-    for (let col = 0; col < plate_num_cols; col++) {
-
-      let bc_row = row_labels[row]
-      let bc_col = col_labels[col]
-
-      let cell_bc = data.find(e => (e.Row == bc_row && e.Column == bc_col)).Barcode.split("_")
-      let bc1 = cell_bc[0]
-      let bc2 = cell_bc[1]
-
-      plate_data[row].push({
-        mouse_on: [col_labels[col], row_labels[row]],
-        bc1: bc1,
-        bc2: bc2,
-        bc_row1: fwd.getIndexByRow(bc1)[0],
-        bc_row2: rev.getIndexByRow(bc2)[0] + 3, // add 3 b/c rev bc's come after fwd bc's
-        bc_offset1: fwd.getIndexByRow(bc1)[1],
-        bc_offset2: rev.getIndexByRow(bc2)[1]
-      })
-    }
-  }
+  $.each(plate_data, function(i, v) {
+    let bcrow1 = bc_rows.eq(v[0].bc_row1),
+      bcrow2 = bc_rows.eq(v[0].bc_row2),
+      prow = plate_rows.eq(v[0].row_here)
+    
+    prow.on("mouseover", function(d) {
+      // highlight plate row
+      $(this).children().css("fill","#000")
+      // highlight two barcode rows
+      $(bcrow1).children().css("fill", "#add")
+      $(bcrow2).children().css("fill", "#daa")
+    })
+    .on("mouseout", function(d) {
+      // clear on mouseout
+      $(this).children().css("fill","#fff")
+      $(bcrow1).children().css("fill", "#fff")
+      $(bcrow2).children().css("fill", "#fff")
+    })
+  })
 
   console.log(plate_data)
 }

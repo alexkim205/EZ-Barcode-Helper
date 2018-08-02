@@ -15,7 +15,7 @@ $(document).ready(function () {
 
   chooseFile()
 
-  var width = 500,
+  var width = 600,
     height = 300,
     padding = {
       top: 50,

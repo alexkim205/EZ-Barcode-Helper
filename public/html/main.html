@@ -7,18 +7,28 @@
 </head>
 
 <body>
-  <div class="container">
-    <div id="file" class="row">
-      Barcode File: 
-      <input type="file" id="barcode_f">
+  <div class="row">
+    <div id="sidepanel" class="col-md-3">
+      <div class="row">
+        <div id="file" class="col-md-12">
+          Barcode File:
+          <br>
+          <input type="file" id="barcode_f">
+        </div>
+      </div>
     </div>
-    <div class="row">
-      Barcodes Plate
-      <svg id="svg_bc"></svg>
-    </div>
-    <div class="row">
-      Plate Preparation
-      <svg id="svg_plate"></svg>
+    <div id="mainpanel" class="col-md-9">
+      <div class="row">
+        <div id="plate" class="col-md-12">
+          Barcodes Plate
+          <svg id="svg_bc"></svg>
+        </div>
+        <div id="plate" class="col-md-12">
+          Plate Preparation
+          <svg id="svg_plate"></svg>
+        </div>
+      </div>
+
     </div>
 
   </div>
