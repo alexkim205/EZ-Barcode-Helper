@@ -18,7 +18,7 @@ $(document).ready(function () {
 
   console.log("ready")
 
-  // var file_data = chooseFile()
+  chooseFile()
   // console.log(file_data)
 
   var width = 500,

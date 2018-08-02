@@ -122,26 +122,27 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
 
 var chooseFile = function () {
 
-  d3.select("input#barcode_f")
-    .attr("accept", ".tsv")
-    .style("margin", "5px")
-    .on("change", function () {
-      var file = d3.event.target.files[0]
-      if (file) {
-        var reader = new FileReader()
-        reader.onloadend = function (evt) {
-          var dataUrl = evt.target.result
-          // The following call results in an "Access denied" error in IE.
-          d3.tsv(dataUrl, function (error, data) {
-            if (error) throw error
-            data.forEach(function (d) {
-              console.log(d)
-            })
-          })
-        }
-        reader.readAsDataURL(file)
-      }
-    })
+  // handle upload button
+  function upload_button(el) {
+    var uploader = document.getElementById(el);
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+      var contents = e.target.result
+      var data = d3.csvParse(contents)
+      console.log(data)
+    };
+
+    uploader.addEventListener("change", handleFiles, false);
+
+    function handleFiles() {
+      // d3.select("#table").text("loading...");
+      var file = this.files[0];
+      reader.readAsText(file);
+    };
+  }
+
+  upload_button("barcode_f")
 
 }
 
