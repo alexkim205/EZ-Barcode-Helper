@@ -3,8 +3,16 @@ var d3 = require("d3")
 
 // require data
 
-var fwd,
-  rev
+var fwd, rev
+
+// lazy scoping -> TODO change later
+var p_width,
+  padding = {
+    top: 100,
+    right: 100,
+    bottom: 100,
+    left: 100
+  }
 
 $.getJSON("../js/data.json", function (data) {
     console.log("success");
@@ -42,9 +50,9 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
 
   var data = new Array(),
     xpos = 1,
-    ypos = 1,
-    p_width = Math.round(width / num_cols),
-    p_height = p_width,
+    ypos = 1
+  p_width = Math.round(width / num_cols)
+  var p_height = p_width,
     height = p_width * num_rows
 
   // populate cell data
@@ -151,6 +159,19 @@ var chooseFile = function () {
     .on("change", function () {
       var file = this.files[0];
       reader.readAsText(file);
+      // unbind all event listeners
+      //// rows
+      var bc_rows = $("#svg_bc").find("g.row"),
+        plate_rows = $("#svg_plate").find("g.row")
+      //// cells
+      var plate_cells = plate_rows.find("rect.cell"),
+        bc_cells = bc_rows.find("rect.cell")
+
+      bc_rows.unbind()
+      plate_rows.unbind()
+      plate_cells.unbind()
+      bc_cells.unbind()
+
     })
 
 }
@@ -229,23 +250,44 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
       bcrow2 = bc_rows.eq(row[0].bc_row2),
       prow = plate_rows.eq(row[0].row_here)
 
+    // render per cell
+    var row_labels = charRange(0, plate_num_rows),
+      col_labels = numRange(plate_num_cols, 1)
+
+    // create array with offsets
+    var offset = row[0].bc_offset2 - row[0].bc_offset1
+    var offset_col_labels = col_labels.concat(col_labels.splice(0, plate_num_cols - offset))
+
+    var x = d3.scalePoint()
+      .domain(offset_col_labels)
+      .range([0, (plate_num_cols - 1) * p_width])
+
+    var xAxis = d3.axisTop()
+      .scale(x)
+      .tickSize(0)
+
     prow.on("mouseover", function (d) {
         // highlight plate row
         $(this).children().css("fill", "#9b59b6")
         // highlight two barcode rows
         $(bcrow1).children().css("fill", "#3498db")
         $(bcrow2).children().css("fill", "#e74c3c")
+        // display numbering with offset
+        d3.select("#" + plate_svg_id).append("g")
+          .attr("class", "offset_colnames")
+          .attr("transform",
+            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
+            (padding.top + (p_width * plate_num_rows) - Math.round(p_width / 2)) + ")")
+          .call(xAxis)
       })
       .on("mouseout", function (d) {
         // clear on mouseout
         $(this).children().css("fill", "#fff")
         $(bcrow1).children().css("fill", "#fff")
         $(bcrow2).children().css("fill", "#fff")
+        plate_svg.find("g.offset_colnames")
+          .remove()
       })
-
-    // render per cell
-    var row_labels = charRange(0, plate_num_rows),
-      col_labels = numRange(plate_num_cols, 1)
 
     $.each(row, function (i, cell) {
 
@@ -256,8 +298,13 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
           // append appropriate info
           $info.append("<p>Row: " + row_labels[cell.row_here] + "</p>")
             .append("<p>Column: " + col_labels[cell.col_here] + "</p>")
-            .append("<p>Forward Barcode: " + cell.bc1 + "</p>")
-            .append("<p>Reverse Barcode: " + cell.bc2 + "</p>")
+            .append("<p>FWD BC: " + cell.bc1 + "</p>")
+            .append("<p>REV BC: " + cell.bc2 + "</p>")
+            .append("<p>FWD BC Offset " + cell.bc_offset1 + "</p>")
+            .append("<p>REV BC Offset " + cell.bc_offset2 + "</p>")
+          // display numbers
+
+
         })
         .on("mouseout", function (d) {
           // clear
