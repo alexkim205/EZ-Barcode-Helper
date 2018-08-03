@@ -106,8 +106,6 @@ var makePlate = function (svg_id, num_rows = 8, num_cols = 12,
     .attr("y", function (d) {
       return d.y
     })
-    .style("fill", "#fff")
-    .style("stroke", "rgba(0,0,0,0.6)")
 
   // draw labels
   var x = d3.scalePoint()
@@ -275,29 +273,32 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
         .attr("class", "offset_colnames")
         .attr("transform",
           "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-          (padding.top + (p_width * row_number) + Math.round(p_width / 2)) + ")")
+          (padding.top + (p_width * row_number) + Math.round(p_width * 3 / 4)) + ")")
         .call(xAxis)
+
     }
 
     prow.on("mouseover", function (d) {
 
-        // highlight plate row
-        $(this).children().css("fill", "#9b59b6")
-        // highlight two barcode rows
-        $(bcrow1).children().css("fill", "#3498db")
-        $(bcrow2).children().css("fill", "#e74c3c")
-        // bc2 display numbering with offset
-        drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0)
-        drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1)
-        drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0)
-      })
-      .on("mouseout", function (d) {
-        // clear on mouseout
-        $(this).children().css("fill", "#fff")
-        $(bcrow1).children().css("fill", "#fff")
-        $(bcrow2).children().css("fill", "#fff")
-        $("g.offset_colnames").remove()
-      })
+      // highlight plate row
+      $(this).children().css("fill", "#9b59b6")
+      // highlight two barcode rows
+      $(bcrow1).children().css("fill", "#3498db")
+      $(bcrow2).children().css("fill", "#e74c3c")
+      // bc2 display numbering with offset
+      drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0)
+      drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1)
+      drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0)
+    
+    })
+
+    prow.on("mouseout", function (d) {
+      // clear on mouseout
+      $(this).children().css("fill", "#fff")
+      $(bcrow1).children().css("fill", "#fff")
+      $(bcrow2).children().css("fill", "#fff")
+      $("g.offset_colnames").remove()
+    })
 
     $.each(row, function (i, cell) {
 

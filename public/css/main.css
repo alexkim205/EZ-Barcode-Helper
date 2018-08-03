@@ -1,35 +1,45 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css');
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css");
 * {
-    font-family: 'Roboto', sans-serif;
-}
+  font-family: "Roboto", sans-serif; }
 
 body {
-    margin: 50px 50px;
-}
+  margin: 50px 50px; }
 
 #plate {
-    text-align: center;
-}
+  text-align: center; }
 
 .row#file {
-    text-align: left;
-}
+  text-align: left; }
 
 svg {
-    display: block;
-    margin: auto;
-}
+  display: block;
+  margin: auto; }
 
-.offset_colnames path,
-.offset_colnames line {
-    fill: none;
-    stroke: none;
-    shape-rendering: crispEdges;
-}
+.offset_colnames path, .offset_colnames line {
+  fill: none;
+  stroke: none;
+  shape-rendering: crispEdges; }
 
 .offset_colnames text {
-    font-family: sans-serif;
-    font-size: 1.2em;
-    /* fill: white */
-}
+  font-family: sans-serif;
+  font-size: 2em;
+  fill: white;
+  pointer-events: none; }
+
+.colnames path, .rownames path {
+  stroke: rgba(0, 0, 0, 0); }
+
+.colnames .tick line, .rownames .tick line {
+  stroke: rgba(0, 0, 0, 0); }
+
+.colnames .tick text, .rownames .tick text {
+  font-size: 1.5em;
+  fill: #202020; }
+
+.colnames line, .rownames line {
+  stroke: #202020; }
+
+rect.cell {
+  fill: #ffffff;
+  stroke: #202020; }
