@@ -244,53 +244,62 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
 
   // render row highlights
   $.each(plate_data, function (i, row) {
-    let bcrow1 = bc_rows.eq(row[0].bc_row1),
-      bcrow2 = bc_rows.eq(row[0].bc_row2),
-      prow = plate_rows.eq(row[0].row_here)
+      let bcrow1 = bc_rows.eq(row[0].bc_row1),
+        bcrow2 = bc_rows.eq(row[0].bc_row2),
+        prow = plate_rows.eq(row[0].row_here)
 
-    // render per cell
-    var row_labels = charRange(0, plate_num_rows),
-      col_labels = numRange(plate_num_cols, 1)
+      // render per cell
+      var row_labels = charRange(0, plate_num_rows),
+        col_labels = numRange(plate_num_cols, 1)
 
-    var drawNumbers = function (_svg_id, id_name, row_number, _num_cols, offset) {
+      var drawNumbers = function (_svg_id, id_name, row_number, _num_cols, offset, _row, hue) {
 
-      // reset labels
-      let _col_labels = numRange(_num_cols, 1)
+        // reset labels
+        let _col_labels = numRange(_num_cols, 1)
 
-      // create array with offsets
-      let offset_col_labels = _col_labels.concat(_col_labels.splice(0, _num_cols - offset))
+        // create array with offsets
+        let offset_col_labels = _col_labels.concat(_col_labels.splice(0, _num_cols - offset))
 
-      let xAxis = d3.axisTop()
-        .scale(
-          d3.scalePoint()
-          .domain(offset_col_labels)
-          .range([0, (_num_cols - 1) * p_width])
-        )
-        .tickSize(0)
+        // create axis
+        let xAxis = d3.axisTop()
+          .scale(
+            d3.scalePoint()
+            .domain(offset_col_labels)
+            .range([0, (_num_cols - 1) * p_width])
+          )
+          .tickSize(0)
 
-      d3.select("#" + _svg_id).append("g")
-        .attr("id", id_name)
-        .attr("class", "offset_colnames")
-        .attr("transform",
-          "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-          (padding.top + (p_width * row_number) + Math.round(p_width * 3 / 4)) + ")")
-        .call(xAxis)
+        // Highlight
+        let colorScale = d3.scaleSequential(hue)
+          .domain([-3, _num_cols])
 
-    }
+        _row.children().each(function (i) {
+          console.log(colorScale(offset_col_labels[i]))
+          $(this).css("fill", colorScale(offset_col_labels[i]))
+        })
 
-    prow.on("mouseover", function (d) {
+        // draw
+        d3.select("#" + _svg_id).append("g")
+          .attr("id", id_name)
+          .attr("class", "offset_colnames")
+          .attr("transform",
+            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
+            (padding.top + (p_width * row_number) + Math.round(p_width * 3 / 4)) + ")")
+          .call(xAxis)
 
-      // highlight plate row
-      $(this).children().css("fill", "#9b59b6")
-      // highlight two barcode rows
-      $(bcrow1).children().css("fill", "#3498db")
-      $(bcrow2).children().css("fill", "#e74c3c")
-      // bc2 display numbering with offset
-      drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0)
-      drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1)
-      drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0)
-    
-    })
+      }
+
+      prow.on("mouseover", function (d) {
+
+          // bc2 display numbering with offset and highlights
+          drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0,
+            bcrow1, d3.interpolateBlues)
+          drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1,
+            bcrow2, d3.interpolateReds)
+          drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0,
+            $(this), d3.interpolatePurples)
+
+      })
 
     prow.on("mouseout", function (d) {
       // clear on mouseout
@@ -326,7 +335,7 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
 
   })
 
-  console.log(plate_data)
+console.log(plate_data)
 
 }
 
