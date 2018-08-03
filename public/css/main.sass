@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto")
+
+@import url("https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css")
+
+$tableColor: #696969
+$transparent: rgba(0, 0, 0, 0)
+$textColor: #FFFFF0
+
+*
+  font-family: "Roboto", sans-serif
+
+body
+  margin: 50px 50px
+
+#plate
+  text-align: center
+
+.row#file
+  text-align: left
+
+svg
+  display: block
+  margin: auto
+
+.offset_colnames
+  path, line
+    fill: none
+    stroke: none
+    shape-rendering: crispEdges
+
+  text
+    font-family: sans-serif
+    font-size: 2em
+    fill: $textColor
+    pointer-events: none
+
+.colnames, .rownames
+  path
+    stroke: $transparent
+
+  .tick
+    line
+      stroke: $transparent
+
+    text
+      font-size: 1.5em
+      fill: $tableColor
+
+  line
+    stroke: $tableColor
+
+rect.cell
+  fill: #ffffff
+  stroke: $tableColor
+
+#well_table, #well_info_table
+  text-align: center
+
+  table
+    border-collapse: collapse
+    width: 100%
+
+    td, th
+      border: 2px solid $tableColor
+      padding: 6px
+      text-align: center
+
+    thead
+      tr
+        background-color: #dddddd
+
+  #file
+    text-align: center
+
+hr
+  width: 100%
+  margin: 30px 0 30px 0
