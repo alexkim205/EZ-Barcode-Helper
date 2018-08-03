@@ -17,7 +17,7 @@ Getting the app up and running is simple. If you don't have `Node.JS`, install i
 Run the following commands to install the npm dependencies and serve the local files on a server.
 
 ```{bash}
-git clone https://github.com/alexkim205/EZ-Barcode-Helper.git
+git clone https://gitlab.com/gimelbrant-lab/EZ-Barcode-Helper.git
 cd EZ-Barcode-Helper
 npm install
 npm run server
@@ -56,7 +56,6 @@ Once your barcode map is uploaded, a table of your tsv file will be displayed an
 <p align="center">
   <img width="600" src="img/plates.png">
 </p>
-
 
 3. Highlighting a row in the plate to prep will highlight the two corresponding rows to pipette from in the barcode master plate.
 4. The offset of the second barcode row (highlighted in red) is automatically detected from the barcode map file. Each highlighted well is numbered and shaded accordingly so that you can easily determine which wells must line up with each other. 
