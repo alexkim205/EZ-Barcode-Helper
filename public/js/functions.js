@@ -144,12 +144,13 @@ var chooseFile = function () {
     var data = d3.tsvParseRows(contents, function (d, i) {
       return {
         Row: d[0],
-        Column: +d[1],
+        Column: d[1],
         Barcode: d[2],
       }
     })
     data.shift() // remove columns
-    console.log(data)
+
+    renderTable(data, "well_table")
     renderBCPlate(data, "svg_bc", "svg_plate")
   }
 
@@ -165,12 +166,60 @@ var chooseFile = function () {
       var plate_cells = plate_rows.find("rect.cell"),
         bc_cells = bc_rows.find("rect.cell")
 
+      // unbind mouse events
       bc_rows.unbind()
       plate_rows.unbind()
       plate_cells.unbind()
       bc_cells.unbind()
 
+      // remove barcode table
+      $("#well_table").empty().append("<h3>Barcode Table</h3>")
+
     })
+
+}
+
+var renderTable = function (data, table_id) {
+
+  var table = d3.select('#well_table').append('table')
+  var thead = table.append('thead')
+  var tbody = table.append('tbody');
+
+  var columns = Object.keys(data[0])
+
+  // append the header row
+  thead.append('tr')
+    .selectAll('th')
+    .data(columns).enter()
+    .append('th')
+    .text(function (column) {
+      return column;
+    });
+
+  // create a row for each object in the data
+  var rows = tbody.selectAll('tr')
+    .data(data)
+    .enter()
+    .append('tr');
+
+  // create a cell in each row for each column
+  var cells = rows.selectAll('td')
+    .data(function (row) {
+      return columns.map(function (column) {
+        return {
+          column: column,
+          value: row[column]
+        };
+      });
+    })
+    .enter()
+    .append('td')
+    .text(function (d) {
+      return d.value;
+    });
+
+  return table;
+
 
 }
 
@@ -244,62 +293,61 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
 
   // render row highlights
   $.each(plate_data, function (i, row) {
-      let bcrow1 = bc_rows.eq(row[0].bc_row1),
-        bcrow2 = bc_rows.eq(row[0].bc_row2),
-        prow = plate_rows.eq(row[0].row_here)
+    let bcrow1 = bc_rows.eq(row[0].bc_row1),
+      bcrow2 = bc_rows.eq(row[0].bc_row2),
+      prow = plate_rows.eq(row[0].row_here)
 
-      // render per cell
-      var row_labels = charRange(0, plate_num_rows),
-        col_labels = numRange(plate_num_cols, 1)
+    // render per cell
+    var row_labels = charRange(0, plate_num_rows),
+      col_labels = numRange(plate_num_cols, 1)
 
-      var drawNumbers = function (_svg_id, id_name, row_number, _num_cols, offset, _row, hue) {
+    var drawNumbers = function (_svg_id, id_name, row_number, _num_cols, offset, _row, hue) {
 
-        // reset labels
-        let _col_labels = numRange(_num_cols, 1)
+      // reset labels
+      let _col_labels = numRange(_num_cols, 1)
 
-        // create array with offsets
-        let offset_col_labels = _col_labels.concat(_col_labels.splice(0, _num_cols - offset))
+      // create array with offsets
+      let offset_col_labels = _col_labels.concat(_col_labels.splice(0, _num_cols - offset))
 
-        // create axis
-        let xAxis = d3.axisTop()
-          .scale(
-            d3.scalePoint()
-            .domain(offset_col_labels)
-            .range([0, (_num_cols - 1) * p_width])
-          )
-          .tickSize(0)
+      // create axis
+      let xAxis = d3.axisTop()
+        .scale(
+          d3.scalePoint()
+          .domain(offset_col_labels)
+          .range([0, (_num_cols - 1) * p_width])
+        )
+        .tickSize(0)
 
-        // Highlight
-        let colorScale = d3.scaleSequential(hue)
-          .domain([-3, _num_cols])
+      // Highlight
+      let colorScale = d3.scaleSequential(hue)
+        .domain([-3, _num_cols])
 
-        _row.children().each(function (i) {
-          console.log(colorScale(offset_col_labels[i]))
-          $(this).css("fill", colorScale(offset_col_labels[i]))
-        })
-
-        // draw
-        d3.select("#" + _svg_id).append("g")
-          .attr("id", id_name)
-          .attr("class", "offset_colnames")
-          .attr("transform",
-            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-            (padding.top + (p_width * row_number) + Math.round(p_width * 3 / 4)) + ")")
-          .call(xAxis)
-
-      }
-
-      prow.on("mouseover", function (d) {
-
-          // bc2 display numbering with offset and highlights
-          drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0,
-            bcrow1, d3.interpolateBlues)
-          drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1,
-            bcrow2, d3.interpolateReds)
-          drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0,
-            $(this), d3.interpolatePurples)
-
+      _row.children().each(function (i) {
+        $(this).css("fill", colorScale(offset_col_labels[i]))
       })
+
+      // draw
+      d3.select("#" + _svg_id).append("g")
+        .attr("id", id_name)
+        .attr("class", "offset_colnames")
+        .attr("transform",
+          "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
+          (padding.top + (p_width * row_number) + Math.round(p_width * 3 / 4)) + ")")
+        .call(xAxis)
+
+    }
+
+    prow.on("mouseover", function (d) {
+
+      // bc2 display numbering with offset and highlights
+      drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0,
+        bcrow1, d3.interpolateBlues)
+      drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1,
+        bcrow2, d3.interpolateReds)
+      drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0,
+        $(this), d3.interpolatePurples)
+
+    })
 
     prow.on("mouseout", function (d) {
       // clear on mouseout
@@ -312,18 +360,52 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
     $.each(row, function (i, cell) {
 
       let cellToHover = prow.children().eq(cell.col_here)
-      let $info = $("#well_id")
+      let $info = $("#well_info_table")
 
       cellToHover.on("mouseover", function (d) {
           // append appropriate info
-          $info.append("<p>Row: " + row_labels[cell.row_here] + "</p>")
-            .append("<p>Column: " + col_labels[cell.col_here] + "</p>")
-            .append("<p>FWD BC: " + cell.bc1 + "</p>")
-            .append("<p>REV BC: " + cell.bc2 + "</p>")
-            .append("<p>FWD BC Offset " + cell.bc_offset1 + "</p>")
-            .append("<p>REV BC Offset " + cell.bc_offset2 + "</p>")
-          // display numbers
+          var table = d3.select('#well_info_table').append('table')
+          var thead = table.append('thead')
+          var tbody = table.append('tbody');
 
+          var columns = ["Row", "Column", "Forward BC", "Reverse BC"]
+          var row_data = [{
+            "Row": row_labels[cell.row_here],
+            "Column": col_labels[cell.col_here],
+            "Forward BC": cell.bc1,
+            "Reverse BC": cell.bc2
+          }]
+          console.log(row_data)
+          // append the header row
+          thead.append('tr')
+            .selectAll('th')
+            .data(columns).enter()
+            .append('th')
+            .text(function (column) {
+              return column
+            })
+
+          // create a row for each object in the data
+          var rows = tbody.selectAll('tr')
+            .data(row_data)
+            .enter()
+            .append('tr');
+
+          // create a cell in each row for each column
+          var cells = rows.selectAll('td')
+            .data(function (row) {
+              return columns.map(function (column) {
+                return {
+                  column: column,
+                  value: row[column]
+                };
+              });
+            })
+            .enter()
+            .append('td')
+            .text(function (d) {
+              return d.value;
+            });
 
         })
         .on("mouseout", function (d) {
@@ -334,9 +416,6 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
     })
 
   })
-
-console.log(plate_data)
-
 }
 
 module.exports = {

@@ -43,3 +43,21 @@ svg {
 rect.cell {
   fill: #ffffff;
   stroke: #696969; }
+
+#well_table, #well_info_table {
+  text-align: center; }
+  #well_table table, #well_info_table table {
+    border-collapse: collapse;
+    width: 100%; }
+    #well_table table td, #well_table table th, #well_info_table table td, #well_info_table table th {
+      border: 2px solid #696969;
+      padding: 6px;
+      text-align: center; }
+    #well_table table thead tr, #well_info_table table thead tr {
+      background-color: #dddddd; }
+  #well_table #file, #well_info_table #file {
+    text-align: center; }
+
+hr {
+  width: 100%;
+  margin: 30px 0 30px 0; }
