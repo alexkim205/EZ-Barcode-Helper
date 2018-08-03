@@ -45,17 +45,16 @@ Once your barcode map is uploaded, a table of your tsv file will be displayed an
   <img width="300" src="img/well_info.png">
 </p>
 
-1. As you hover over each well with your mouse, per well information is displayed on the left sidebar. 
+As you hover over each well with your mouse, per well information is displayed on the left sidebar. 
 
 <p align="center">
   <img width="400" src="img/bc_table.png">
 </p>
 
-2. Display barcode table
+Display barcode table
 
 <p align="center">
   <img width="600" src="img/plates.png">
 </p>
 
-3. Highlighting a row in the plate to prep will highlight the two corresponding rows to pipette from in the barcode master plate.
-4. The offset of the second barcode row (highlighted in red) is automatically detected from the barcode map file. Each highlighted well is numbered and shaded accordingly so that you can easily determine which wells must line up with each other. 
+Highlighting a row in the plate to prep will highlight the two corresponding rows to pipette from in the barcode master plate. The offset of the second barcode row (highlighted in red) is automatically detected from the barcode map file. Each highlighted well is numbered and shaded accordingly so that you can easily determine which wells must line up with each other. 
