@@ -26,13 +26,14 @@ npm run server
 Go to [http://127.0.0.1:8080/html/main.html](http://127.0.0.1:8080/html/main.html) on a web browser of your choice.
 
 Choose your barcode map file. This must be a tsv file in the below format. Example barcode maps can be found in the [data/barcodes/](https://github.com/alexkim205/EZ-Barcode-Helper/tree/master/data/barcodes) folder. 
-<center>
+
+<div align="center">
 | Row   | Column | Barcode       |
 | :---: | :----: | ------------: |
 | A     | 1      | AGTCAA_GTGAAA |
 | A     | 2      | AGTCAA_GTGAAA |
 | A     | 3      | ATGTCA_GTTTCG |
-</center>
+</div>
 
 
 Once your barcode map is uploaded, a table of your tsv file will be displayed and you should be ready to play. Hover over the Plate Preparation plate to explore the interactive features of the app. 
@@ -47,7 +48,7 @@ Once your barcode map is uploaded, a table of your tsv file will be displayed an
   <img width="300" src="img/well_info.png">
 </p>
 
-1. Per Well Information is displayed on the left sidebar as you hover over each well in the plate. 
+1. As you hover over each well with your mouse, per well information is displayed on the left sidebar. 
 
 <p align="center">
   <img width="400" src="img/bc_table.png">
