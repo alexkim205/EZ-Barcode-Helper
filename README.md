@@ -39,7 +39,7 @@ Once your barcode map is uploaded, a table of your tsv file will be displayed an
 1. Per Well Information is displayed on the left sidebar as you hover over each well in the plate. 
 
 <p align="center">
-  <img width="460" height="300" src="img/well_info.png">
+  <img width="300" src="img/well_info.png">
 </p>
 
 1. Highlighting a row in the plate to prep will highlight the two corresponding rows to pipette from in the barcode master plate.
