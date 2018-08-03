@@ -254,60 +254,49 @@ var renderBCPlate = function (data, bc_svg_id = "svg_bc", plate_svg_id = "svg_pl
     var row_labels = charRange(0, plate_num_rows),
       col_labels = numRange(plate_num_cols, 1)
 
-    // create array with offsets
-    var offset = row[0].bc_offset2 - row[0].bc_offset1
-    var offset_col_labels = col_labels.concat(col_labels.splice(0, bc_num_cols - offset))
+    var drawNumbers = function (_svg_id, id_name, row_number, _num_cols, offset) {
 
-    var x_normal = d3.scalePoint()
-      .domain(numRange(plate_num_cols, 1))
-      .range([0, (bc_num_cols - 1) * p_width])
-    var x_off = d3.scalePoint()
-      .domain(offset_col_labels)
-      .range([0, (bc_num_cols - 1) * p_width])
-    var xAxis_normal = d3.axisTop()
-      .scale(x_normal)
-      .tickSize(0)
-    var xAxis_off = d3.axisTop()
-      .scale(x_off)
-      .tickSize(0)
+      // reset labels
+      let _col_labels = numRange(_num_cols, 1)
 
-    // TODO CHANGE AXES INTO FUNCTION
+      // create array with offsets
+      let offset_col_labels = _col_labels.concat(_col_labels.splice(0, _num_cols - offset))
+
+      let xAxis = d3.axisTop()
+        .scale(
+          d3.scalePoint()
+          .domain(offset_col_labels)
+          .range([0, (_num_cols - 1) * p_width])
+        )
+        .tickSize(0)
+
+      d3.select("#" + _svg_id).append("g")
+        .attr("id", id_name)
+        .attr("class", "offset_colnames")
+        .attr("transform",
+          "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
+          (padding.top + (p_width * row_number) + Math.round(p_width / 2)) + ")")
+        .call(xAxis)
+    }
+
     prow.on("mouseover", function (d) {
+
         // highlight plate row
         $(this).children().css("fill", "#9b59b6")
         // highlight two barcode rows
         $(bcrow1).children().css("fill", "#3498db")
         $(bcrow2).children().css("fill", "#e74c3c")
         // bc2 display numbering with offset
-        d3.select("#" + bc_svg_id).append("g")
-          .attr("class", "offset_bc2_colnames")
-          .attr("transform",
-            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-            (padding.top + (p_width * row[0].bc_row2) + Math.round(p_width / 2)) + ")")
-          .call(xAxis_off)
-        // bc1
-        d3.select("#" + bc_svg_id).append("g")
-          .attr("class", "offset_bc1_colnames")
-          .attr("transform",
-            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-            (padding.top + (p_width * row[0].bc_row1) + Math.round(p_width / 2)) + ")")
-          .call(xAxis_normal)
-        // plate
-        d3.select("#" + plate_svg_id).append("g")
-          .attr("class", "offset_plate_colnames")
-          .attr("transform",
-            "translate(" + (padding.left + Math.round(p_width / 2)) + "," +
-            (padding.top + (p_width * row[0].row_here) + Math.round(p_width / 2)) + ")")
-          .call(xAxis_normal)
+        drawNumbers(bc_svg_id, "offset_bc1_colnames", row[0].bc_row1, bc_num_cols, 0)
+        drawNumbers(bc_svg_id, "offset_bc2_colnames", row[0].bc_row2, bc_num_cols, row[0].bc_offset2 - row[0].bc_offset1)
+        drawNumbers(plate_svg_id, "offset_plate_colnames", row[0].row_here, plate_num_cols, 0)
       })
       .on("mouseout", function (d) {
         // clear on mouseout
         $(this).children().css("fill", "#fff")
         $(bcrow1).children().css("fill", "#fff")
         $(bcrow2).children().css("fill", "#fff")
-        $("#" + bc_svg_id).find("g.offset_bc1_colnames").remove()
-        $("#" + bc_svg_id).find("g.offset_bc2_colnames").remove()
-        $("#" + plate_svg_id).find("g.offset_plate_colnames").remove()
+        $("g.offset_colnames").remove()
       })
 
     $.each(row, function (i, cell) {
