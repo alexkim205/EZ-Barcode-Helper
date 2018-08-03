@@ -27,14 +27,11 @@ Go to [http://127.0.0.1:8080/html/main.html](http://127.0.0.1:8080/html/main.htm
 
 Choose your barcode map file. This must be a tsv file in the below format. Example barcode maps can be found in the [data/barcodes/](https://github.com/alexkim205/EZ-Barcode-Helper/tree/master/data/barcodes) folder. 
 
-<div align="center">
 | Row   | Column | Barcode       |
 | :---: | :----: | ------------: |
 | A     | 1      | AGTCAA_GTGAAA |
 | A     | 2      | AGTCAA_GTGAAA |
 | A     | 3      | ATGTCA_GTTTCG |
-</div>
-
 
 Once your barcode map is uploaded, a table of your tsv file will be displayed and you should be ready to play. Hover over the Plate Preparation plate to explore the interactive features of the app. 
 
